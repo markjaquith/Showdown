@@ -29,6 +29,7 @@ class WCSF_2014_Showdown_Plugin {
 		foreach ( $posts as $p ) {
 			if ( false !== strpos( $p->post_content, '[showdown]' ) ) {
 				wp_enqueue_script( 'showdown', plugin_dir_url( __FILE__ ) . 'js/showdown.js', array( 'wp-backbone' ), '1.0' );
+				add_action( 'wp_head', array( $this, 'templates' ) );
 			}
 		}
 		return $posts;
@@ -112,24 +113,70 @@ class WCSF_2014_Showdown_Plugin {
 	public function json_data() {
 		return (object) array(
 			'competitions' => array(
-				'cats' => array(
-					'angry' => array(
-						'name' => 'Angry',
-						'votes' => array(
-							array(
-								'name' => 'John',
-								'gravatar' => 'abc123',
-							),
-							array(
-								'name' => 'Mary',
-								'gravatar' => 'abc123',
+				array(
+					'id' => 1,
+					'name' => 'Cats',
+					'competitors' => array(
+						array(
+							'id' => 1,
+							'name' => 'Angry',
+							'votes' => array(
+								array(
+									'id' => 1,
+									'name' => 'James',
+									'gravatar' => 'abc123',
+								),
+								array(
+									'id' => 2,
+									'name' => 'Martha',
+									'gravatar' => 'abc123',
+								)
+							)
+						),
+						array(
+							'id' => 2,
+							'name' => 'Fluffy',
+							'votes' => array(),
+						),
+						array(
+							'id' => 3,
+							'name' => 'Queen',
+							'votes' => array(
+								array(
+									'id' => 1,
+									'name' => 'Jimmy',
+									'gravatar' => 'abc123',
+								)
+							)
+						)
+					)
+				),
+				array(
+					'id' => 2,
+					'name' => 'Dogs',
+					'competitors' => array(
+						array(
+							'id' => 1,
+							'name' => 'Bruno',
+							'votes' => array(
+								array(
+									'id' => 1,
+									'name' => 'Juan',
+									'gravatar' => 'abc123',
+								),
+								array(
+									'id' => 2,
+									'name' => 'Maria',
+									'gravatar' => 'abc123',
+								),
 							),
 						),
-					),
-					'fluffy' => array(
-						'name' => 'Fluffy',
-						'votes' => array(),
-					),
+						array(
+							'id' => 2,
+							'name' => 'Rowdy',
+							'votes' => array(),
+						),
+					)
 				)
 			)
 		);
@@ -140,6 +187,10 @@ class WCSF_2014_Showdown_Plugin {
 		$return .= '<div class="showdown-plugin"></div>';
 		$return .= '<script>showdownPlugin.start(' . json_encode( $this->json_data() ) . ');</script>';
 		return $return;
+	}
+
+	public function templates() {
+		include( plugin_dir_path( __FILE__ ) . '/tmpl/backbone.php' );
 	}
 }
 
