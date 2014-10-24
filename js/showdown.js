@@ -3,7 +3,9 @@
 var app = window.showdownPlugin = {
 	start: function(data) {
 		this.data = data;
-		this.competitions = new this.Collections.Competitions(data.competitions);
+		this.voters = new this.Collections.Votes( data.voters );
+		delete this.data.voters;
+		this.competitions = new this.Collections.Competitions( data.competitions );
 		delete this.data.competitions;
 		this.view = new this.Views.Competitions({ collection: this.competitions });
 		this.view.inject( '.showdown-plugin' );
@@ -59,7 +61,8 @@ app.Models.Competitor = Backbone.Model.extend({
 	votes: {},
 
 	initialize: function() {
-		this.votes = new app.Collections.Votes( this.get('votes') || [] );
+		// Grab the voter model from app.voters
+		this.votes = new app.Collections.Votes( _.map( this.get('votes'), function(v) { return app.voters.get(v); }) || [] );
 		this.unset('votes');
 		this.listenTo( this.votes, 'add', this.announceAddVote );
 	},

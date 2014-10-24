@@ -151,20 +151,24 @@ class WCSF_2014_Showdown_Plugin {
 			);
 		}
 		$competions = array();
+		$voters = array(); // Output each voter only once for efficiency
 		$_competitions = get_terms( 'competition' );
 		foreach( $_competitions as $c ) {
 			$competitors = array();
 			$_competitors = get_posts( array( 'post_type' => 'showdown_competitor', 'posts_per_page' => -1, 'competition' => $c->slug ) );
 			foreach ( $_competitors as $competitor ) {
-				$votes = array();
-				$_votes = get_post_meta( $competitor->ID, 'showdown_vote', false );
-				foreach ( $_votes as $vote ) {
-					$vote_user = new WP_User( (int) $vote );
-					$votes[] = array(
-						'id' => $vote_user->ID,
-						'name' => $vote_user->user_login,
-						'img' => get_avatar( $vote_user->ID, 256 ),
-					);
+				$votes = get_post_meta( $competitor->ID, 'showdown_vote', false );
+				$votes = $votes ? $votes : array();
+				$votes = array_map( 'absint', $votes );
+				foreach ( $votes as $vote ) {
+					if ( ! isset( $voters[$vote] ) ) {
+						$vote_user = new WP_User( (int) $vote );
+						$voters[$vote] = array(
+							'id' => $vote_user->ID,
+							'name' => $vote_user->user_login,
+							'img' => get_avatar( $vote_user->ID, 256 ),
+						);
+					}
 				}
 				$competitors[] = array(
 					'id' => $competitor->ID,
@@ -187,6 +191,7 @@ class WCSF_2014_Showdown_Plugin {
 			'nonce' => wp_create_nonce( 'showdown' ),
 			'user' => $user_data,
 			'competitions' => $competitions,
+			'voters' => array_values( $voters ), // Kill the keys
 		);
 	}
 
