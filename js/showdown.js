@@ -2,9 +2,9 @@
 
 var app = window.showdownPlugin = {
 	start: function(data) {
-		this.user = data.user;
-		this.nonce = data.nonce;
+		this.data = data;
 		this.competitions = new this.Collections.Competitions(data.competitions);
+		delete this.data.competitions;
 		this.view = new this.Views.Competitions({ collection: this.competitions });
 		this.view.inject( '.showdown-plugin' );
 	}
@@ -49,7 +49,7 @@ app.Models.Competition = Backbone.Model.extend({
 			action: 'showdown_vote',
 			competition: this.get('id'),
 			competitor: competitor.get('id'),
-			_ajax_nonce: app.nonce || null
+			_ajax_nonce: app.data.nonce || null
 		};
 		wp.ajax.send( options );
 	}
@@ -149,14 +149,10 @@ app.Views.Competitor = app.View.extend({
 	},
 
 	vote: function() {
-		if ( app.user.loggedIn ) {
-			this.model.votes.add({
-				name: app.user.name,
-				gravatar: app.user.gravatar,
-				id: app.user.id,
-			});
+		if ( app.data.loggedIn ) {
+			this.model.votes.add( app.data.user );
 		} else {
-			alert( 'Please log in to vote' );
+			alert( app.data.msg.pleaseLogIn );
 		}
 	},
 

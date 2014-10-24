@@ -43,17 +43,24 @@ class WCSF_2014_Showdown_Plugin {
 	}
 
 	public function ajax() {
+		// Saves me from having to individually stripslashes() each one
 		$request = stripslashes_deep( $_REQUEST );
+
+		// Verify the nonce
 		if ( ! wp_verify_nonce( $request['_ajax_nonce'], 'showdown' ) ) {
-			$this->json_error( 'Invalid nonce' );
+			$this->json_error( __( 'Invalid nonce', 'showdown' ) );
 		} else {
 			$user = wp_get_current_user();
-			$competitors = get_posts( array( 'post_type' => 'showdown_competitor', 'competition' => $request['competition'] ) );
-			// Clear out any existing votes
+
+			// Clear out any existing votes on the competition
+			$competitors = get_posts( array( 'post_type' => 'showdown_competitor', 'posts_per_page' => -1, 'competition' => $request['competition'] ) );
 			foreach ( $competitors as $competitor ) {
 				delete_post_meta( $competitor->ID, 'showdown_vote', $user->ID );
 			}
+
+			// Register the vote for the competitor
 			add_post_meta( $request['competitor'], 'showdown_vote', $user->ID );
+
 			wp_send_json_success( array() );
 		}
 	}
@@ -135,13 +142,13 @@ class WCSF_2014_Showdown_Plugin {
 
 	public function json_data() {
 		$user = wp_get_current_user();
-		$user_data = array(
-			'loggedIn' => is_user_logged_in(),
-		);
+		$user_data = array();
 		if ( $user ) {
-			$user_data['id'] = $user->ID;
-			$user_data['name'] = $user->user_login;
-			$user_data['gravatar'] = get_avatar( $user->ID, 256 );
+			$user_data = array(
+				'id' => $user->ID,
+				'name' => $user->user_login,
+				'img' => get_avatar( $user->ID, 256 ),
+			);
 		}
 		$competions = array();
 		$_competitions = get_terms( 'competition' );
@@ -156,7 +163,7 @@ class WCSF_2014_Showdown_Plugin {
 					$votes[] = array(
 						'id' => $vote_user->ID,
 						'name' => $vote_user->user_login,
-						'gravatar' => get_avatar( $vote_user->ID, 256 ),
+						'img' => get_avatar( $vote_user->ID, 256 ),
 					);
 				}
 				$competitors[] = array(
@@ -173,6 +180,10 @@ class WCSF_2014_Showdown_Plugin {
 			);
 		}
 		return (object) array(
+			'loggedIn' => is_user_logged_in(),
+			'msg' => array(
+				'pleaseLogIn' => __( 'Please log in to vote', 'showdown' ),
+			),
 			'nonce' => wp_create_nonce( 'showdown' ),
 			'user' => $user_data,
 			'competitions' => $competitions,
