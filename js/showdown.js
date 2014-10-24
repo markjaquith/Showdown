@@ -12,15 +12,17 @@ var app = window.showdownPlugin = {
 app.View = wp.Backbone.View.extend({
 	render: function() {
 		var result = wp.Backbone.View.prototype.render.apply( this, arguments );
-		if ( typeof this.postRender === "function" ) {
+		if ( _.isFunction( this.postRender ) ) {
 			this.postRender();
 		}
 		return result;
 	},
 
 	prepare: function() {
-		if ( typeof this.model !== "undefined" && typeof this.model.toJSON === "function" ) {
+		if ( ! _.isUndefined( this.model ) && _.isFunction( this.model.toJSON ) ) {
 			return this.model.toJSON();
+		} else {
+			return {};
 		}
 	}
 });
@@ -39,9 +41,9 @@ app.Models.Competition = Backbone.Model.extend({
 });
 
 app.Models.Competitor = Backbone.Model.extend({
-	voters: {},
+	votes: {},
 	initialize: function() {
-		this.voters = new app.Collections.Votes( this.get('votes') || [] );
+		this.votes = new app.Collections.Votes( this.get('votes') || [] );
 		this.unset('votes');
 	}
 });
@@ -72,12 +74,16 @@ app.Views = {};
 
 // Competitions view
 app.Views.Competitions = app.View.extend({
+	className: "competitions",
+
 	initialize: function() {
 		_.each( this.collection.models, this.addView, this );
 	},
-	addView: function( competition ) {
-		this.views.add( new app.Views.Competition({ model: competition }) );
+
+	addView: function( competition, options ) {
+		this.views.add( new app.Views.Competition({ model: competition }), options || {} );
 	},
+
 	inject: function( selector ) {
 		this.render();
 		$(selector).html( this.el );
@@ -103,8 +109,8 @@ app.Views.Competitors = app.View.extend({
 		_.each( this.collection.models, this.addView, this );
 	},
 
-	addView: function( competitor ) {
-		this.views.add( new app.Views.Competitor({ model: competitor }) );
+	addView: function( competitor, options ) {
+		this.views.add( new app.Views.Competitor({ model: competitor }), options || {} );
 	}
 });
 
@@ -114,27 +120,17 @@ app.Views.Competitor = app.View.extend({
 	template: wp.template( "competitor" ),
 
 	initialize: function() {
-		this.views.set( '.votes-wrap', new app.Views.Votes({ collection: this.model.voters }) );
-	}
-});
-
-// Votes view
-app.Views.Votes = app.View.extend({
-	className: "votes",
-	tagName: "ul",
-
-	initialize: function() {
-		_.each( this.collection.models, this.addView, this );
+		_.each( this.model.votes.models, this.addVote, this );
 	},
 
-	addView: function( voter ) {
-		this.views.add( new app.Views.Vote({ model: voter }) );
+	addVote: function( vote, options ) {
+		this.views.add( '.votes', new app.Views.Vote({ model: vote }), options || {} );
 	}
 });
 
 // Vote view
 app.Views.Vote = app.View.extend({
-	className: "vote",
+	tagName: "li",
 	template: wp.template( "vote" ),
 });
 

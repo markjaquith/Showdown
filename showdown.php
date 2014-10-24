@@ -29,6 +29,7 @@ class WCSF_2014_Showdown_Plugin {
 		foreach ( $posts as $p ) {
 			if ( false !== strpos( $p->post_content, '[showdown]' ) ) {
 				wp_enqueue_script( 'showdown', plugin_dir_url( __FILE__ ) . 'js/showdown.js', array( 'wp-backbone' ), '1.0' );
+				wp_enqueue_style( 'showdown', plugin_dir_url( __FILE__ ) . 'css/showdown.css', array(), '1.0' );
 				add_action( 'wp_head', array( $this, 'templates' ) );
 			}
 		}
@@ -120,6 +121,7 @@ class WCSF_2014_Showdown_Plugin {
 						array(
 							'id' => 1,
 							'name' => 'Angry',
+							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
 							'votes' => array(
 								array(
 									'id' => 1,
@@ -136,11 +138,13 @@ class WCSF_2014_Showdown_Plugin {
 						array(
 							'id' => 2,
 							'name' => 'Fluffy',
+							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
 							'votes' => array(),
 						),
 						array(
 							'id' => 3,
 							'name' => 'Queen',
+							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
 							'votes' => array(
 								array(
 									'id' => 1,
@@ -158,6 +162,7 @@ class WCSF_2014_Showdown_Plugin {
 						array(
 							'id' => 1,
 							'name' => 'Bruno',
+							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
 							'votes' => array(
 								array(
 									'id' => 1,
@@ -174,6 +179,7 @@ class WCSF_2014_Showdown_Plugin {
 						array(
 							'id' => 2,
 							'name' => 'Rowdy',
+							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
 							'votes' => array(),
 						),
 					)
@@ -183,9 +189,8 @@ class WCSF_2014_Showdown_Plugin {
 	}
 
 	public function shortcode() {
-		$return  = "<p>Showdown</p>\n";
-		$return .= '<div class="showdown-plugin"></div>';
-		$return .= '<script>showdownPlugin.start(' . json_encode( $this->json_data() ) . ');</script>';
+		$return  = '<div class="showdown-plugin"></div>' . "\n";
+		$return .= '<script>showdownPlugin.start(' . json_encode( $this->json_data() ) . ');</script>' . "\n";
 		return $return;
 	}
 

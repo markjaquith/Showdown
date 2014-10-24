@@ -3,17 +3,16 @@ defined( 'WPINC' ) or die;
 ?>
 
 <script id="tmpl-competition" type="text/html">
-<b>{{data.name}}</b> showdown:
+<h2>{{data.name}} showdown</h2>
 
 <div class="competitors-wrap"></div>
 </script>
 
 <script id="tmpl-competitor" type="text/html">
-<b>{{data.name}}</b>
+<p><b>{{data.name}}</b></p>
+<p><img src="{{data.img}}" /></p>
 
-<div class="votes-wrap"></div>
+<ul class="votes"></ul>
 </script>
 
-<script id="tmpl-vote" type="text/html">
-<li>{{data.name}}</li>
-</script>
+<script id="tmpl-vote" type="text/html">{{data.name}}</script>

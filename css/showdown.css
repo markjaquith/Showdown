@@ -1,0 +1,38 @@
+.showdown-plugin, .showdown-plugin * {
+	box-sizing: border-box;
+}
+
+.showdown-plugin p {
+	margin: 10px 0 !important;
+}
+
+.showdown-plugin .competition {
+	clear: both;
+	padding-bottom: 30px;
+	margin: 30px auto;
+	border-bottom: 1px solid #ccc;
+}
+
+.showdown-plugin .competition:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+
+.showdown-plugin .competitor {
+	width: 33.3333333333333333333%;
+	float: left;
+	padding: 0 10px;
+}
+
+.showdown-plugin .competitor:first-of-type {
+	padding-left: 0;
+}
+
+.showdown-plugin .competitor:last-of-type {
+	padding-right: 0;
+}
+
+.showdown-plugin .competitor img {
+	cursor: pointer;
+}
