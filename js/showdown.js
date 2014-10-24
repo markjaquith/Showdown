@@ -97,20 +97,11 @@ app.Views.Competition = app.View.extend({
 	template: wp.template("competition"),
 
 	initialize: function() {
-		this.views.set( '.competitors-wrap', new app.Views.Competitors({ collection: this.model.competitors }) );
-	}
-});
-
-// Competitors view
-app.Views.Competitors = app.View.extend({
-	className: "competitors",
-
-	initialize: function() {
-		_.each( this.collection.models, this.addView, this );
+		_.each( this.model.competitors.models, this.addCompetitor, this );
 	},
 
-	addView: function( competitor, options ) {
-		this.views.add( new app.Views.Competitor({ model: competitor }), options || {} );
+	addCompetitor: function( competitor, options ) {
+		this.views.add( '.competitors', new app.Views.Competitor({ model: competitor }), options || {} );
 	}
 });
 
