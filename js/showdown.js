@@ -12,14 +12,12 @@ var app = window.showdownPlugin = {
 	}
 };
 
-// Extend wp.Backbone.View with .prepare() and .render()
+// Extend wp.Backbone.View with .prepare() and .inject()
 app.View = wp.Backbone.View.extend({
-	render: function() {
-		var result = wp.Backbone.View.prototype.render.apply( this, arguments );
-		if ( _.isFunction( this.postRender ) ) {
-			this.postRender();
-		}
-		return result;
+	inject: function( selector ) {
+		this.render();
+		$(selector).html( this.el );
+		this.views.ready();
 	},
 
 	prepare: function() {
@@ -115,12 +113,6 @@ app.Views.Competitions = app.View.extend({
 
 	addCompetitionView: function( competition, options ) {
 		this.views.add( new app.Views.Competition({ model: competition }), options || {} );
-	},
-
-	inject: function( selector ) {
-		this.render();
-		$(selector).html( this.el );
-		this.views.ready();
 	}
 });
 
