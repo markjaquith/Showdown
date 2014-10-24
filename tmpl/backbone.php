@@ -10,7 +10,7 @@ defined( 'WPINC' ) or die;
 
 <script id="tmpl-competitor" type="text/html">
 <p><b>{{data.name}}</b></p>
-<p><img src="{{data.img}}" /></p>
+<p><img class="competitor" src="{{data.img}}" /></p>
 
 <ul class="votes"></ul>
 </script>

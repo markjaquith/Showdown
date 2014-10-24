@@ -77,10 +77,10 @@ app.Views.Competitions = app.View.extend({
 	className: "competitions",
 
 	initialize: function() {
-		_.each( this.collection.models, this.addView, this );
+		_.each( this.collection.models, this.addCompetitionView, this );
 	},
 
-	addView: function( competition, options ) {
+	addCompetitionView: function( competition, options ) {
 		this.views.add( new app.Views.Competition({ model: competition }), options || {} );
 	},
 
@@ -97,10 +97,10 @@ app.Views.Competition = app.View.extend({
 	template: wp.template("competition"),
 
 	initialize: function() {
-		_.each( this.model.competitors.models, this.addCompetitor, this );
+		_.each( this.model.competitors.models, this.addCompetitorView, this );
 	},
 
-	addCompetitor: function( competitor, options ) {
+	addCompetitorView: function( competitor, options ) {
 		this.views.add( '.competitors', new app.Views.Competitor({ model: competitor }), options || {} );
 	}
 });
@@ -109,12 +109,22 @@ app.Views.Competition = app.View.extend({
 app.Views.Competitor = app.View.extend({
 	className: "competitor",
 	template: wp.template( "competitor" ),
-
-	initialize: function() {
-		_.each( this.model.votes.models, this.addVote, this );
+	events: {
+		'click img.competitor': 'vote'
 	},
 
-	addVote: function( vote, options ) {
+	initialize: function() {
+		_.each( this.model.votes.models, this.addVoteView, this );
+		this.listenTo( this.model.votes, 'add', this.addVoteView );
+	},
+
+	vote: function() {
+		this.model.votes.add({
+			name: 'Mark',
+		});
+	},
+
+	addVoteView: function( vote, options ) {
 		this.views.add( '.votes', new app.Views.Vote({ model: vote }), options || {} );
 	}
 });

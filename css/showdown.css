@@ -19,13 +19,13 @@
 	clear: both;
 }
 
-.showdown-plugin .competitor {
+.showdown-plugin div.competitor {
 	width: 33.3333333333333333333%;
 	float: left;
 	padding: 0 10px;
 }
 
-.showdown-plugin .competitor img {
+.showdown-plugin img.competitor {
 	cursor: pointer;
 }
 
