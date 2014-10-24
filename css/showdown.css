@@ -36,4 +36,11 @@
 
 .showdown-plugin .votes > li {
 	margin: 0;
+	float: left;
+	width: 20%;
+}
+
+.showdown-plugin .votes > li img {
+	height: auto;
+	border-radius: 0;
 }

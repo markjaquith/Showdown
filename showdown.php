@@ -23,6 +23,7 @@ class WCSF_2014_Showdown_Plugin {
 		add_action( 'init', array( $this, 'register_tax' ) );
 		add_action( 'init', array( $this, 'register_cpt' ) );
 		add_filter( 'the_posts', array( $this, 'the_posts' ) );
+		add_action( 'wp_ajax_showdown_vote', array( $this, 'ajax' ) );
 	}
 
 	public function the_posts( $posts ) {
@@ -34,6 +35,27 @@ class WCSF_2014_Showdown_Plugin {
 			}
 		}
 		return $posts;
+	}
+
+	public function json_error( $message ) {
+		status_header( 412 );
+		wp_send_json_error( array( 'message' => $message ) );
+	}
+
+	public function ajax() {
+		$request = stripslashes_deep( $_REQUEST );
+		if ( ! wp_verify_nonce( $request['_ajax_nonce'], 'showdown' ) ) {
+			$this->json_error( 'Invalid nonce' );
+		} else {
+			$user = wp_get_current_user();
+			$competitors = get_posts( array( 'post_type' => 'showdown_competitor', 'competition' => $request['competition'] ) );
+			// Clear out any existing votes
+			foreach ( $competitors as $competitor ) {
+				delete_post_meta( $competitor->ID, 'showdown_vote', $user->ID );
+			}
+			add_post_meta( $request['competitor'], 'showdown_vote', $user->ID );
+			wp_send_json_success( array() );
+		}
 	}
 
 	public function add_shortcode() {
@@ -112,79 +134,48 @@ class WCSF_2014_Showdown_Plugin {
 	}
 
 	public function json_data() {
+		$user = wp_get_current_user();
+		$user_data = array(
+			'loggedIn' => is_user_logged_in(),
+		);
+		if ( $user ) {
+			$user_data['id'] = $user->ID;
+			$user_data['name'] = $user->user_login;
+			$user_data['gravatar'] = get_avatar( $user->ID, 256 );
+		}
+		$competions = array();
+		$_competitions = get_terms( 'competition' );
+		foreach( $_competitions as $c ) {
+			$competitors = array();
+			$_competitors = get_posts( array( 'post_type' => 'showdown_competitor', 'posts_per_page' => -1, 'competition' => $c->slug ) );
+			foreach ( $_competitors as $competitor ) {
+				$votes = array();
+				$_votes = get_post_meta( $competitor->ID, 'showdown_vote', false );
+				foreach ( $_votes as $vote ) {
+					$vote_user = new WP_User( (int) $vote );
+					$votes[] = array(
+						'id' => $vote_user->ID,
+						'name' => $vote_user->user_login,
+						'gravatar' => get_avatar( $vote_user->ID, 256 ),
+					);
+				}
+				$competitors[] = array(
+					'id' => $competitor->ID,
+					'name' => $competitor->post_title,
+					'img' => wp_get_attachment_image_src( get_post_thumbnail_id( $competitor->ID ), 'large' )[0],
+					'votes' => $votes,
+				);
+			}
+			$competitions[] = array(
+				'id' => $c->slug,
+				'name' => $c->name,
+				'competitors' => $competitors
+			);
+		}
 		return (object) array(
-			'competitions' => array(
-				array(
-					'id' => 1,
-					'name' => 'Cats',
-					'competitors' => array(
-						array(
-							'id' => 1,
-							'name' => 'Angry',
-							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
-							'votes' => array(
-								array(
-									'id' => 1,
-									'name' => 'James',
-									'gravatar' => 'abc123',
-								),
-								array(
-									'id' => 2,
-									'name' => 'Martha',
-									'gravatar' => 'abc123',
-								)
-							)
-						),
-						array(
-							'id' => 2,
-							'name' => 'Fluffy',
-							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
-							'votes' => array(),
-						),
-						array(
-							'id' => 3,
-							'name' => 'Queen',
-							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
-							'votes' => array(
-								array(
-									'id' => 1,
-									'name' => 'Jimmy',
-									'gravatar' => 'abc123',
-								)
-							)
-						)
-					)
-				),
-				array(
-					'id' => 2,
-					'name' => 'Dogs',
-					'competitors' => array(
-						array(
-							'id' => 1,
-							'name' => 'Bruno',
-							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
-							'votes' => array(
-								array(
-									'id' => 1,
-									'name' => 'Juan',
-									'gravatar' => 'abc123',
-								),
-								array(
-									'id' => 2,
-									'name' => 'Maria',
-									'gravatar' => 'abc123',
-								),
-							),
-						),
-						array(
-							'id' => 2,
-							'name' => 'Rowdy',
-							'img' => 'http://wp.git/wp-content/uploads/2014/10/fluffy.jpg',
-							'votes' => array(),
-						),
-					)
-				)
-			)
+			'nonce' => wp_create_nonce( 'showdown' ),
+			'user' => $user_data,
+			'competitions' => $competitions,
 		);
 	}
 

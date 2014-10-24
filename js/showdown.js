@@ -2,6 +2,8 @@
 
 var app = window.showdownPlugin = {
 	start: function(data) {
+		this.user = data.user;
+		this.nonce = data.nonce;
 		this.competitions = new this.Collections.Competitions(data.competitions);
 		this.view = new this.Views.Competitions({ collection: this.competitions });
 		this.view.inject( '.showdown-plugin' );
@@ -34,17 +36,36 @@ app.Models = {};
 
 app.Models.Competition = Backbone.Model.extend({
 	competitors: {},
+
 	initialize: function() {
 		this.competitors = new app.Collections.Competitors( this.get('competitors') || [] );
 		this.unset('competitors');
+		this.listenTo( this.competitors, 'addVote', this.syncVote );
+	},
+
+	syncVote: function( vote, competitor ) {
+		var options = { context: this };
+		options.data = {
+			action: 'showdown_vote',
+			competition: this.get('id'),
+			competitor: competitor.get('id'),
+			_ajax_nonce: app.nonce || null
+		};
+		wp.ajax.send( options );
 	}
 });
 
 app.Models.Competitor = Backbone.Model.extend({
 	votes: {},
+
 	initialize: function() {
 		this.votes = new app.Collections.Votes( this.get('votes') || [] );
 		this.unset('votes');
+		this.listenTo( this.votes, 'add', this.announceAddVote );
+	},
+
+	announceAddVote: function( model, collection ) {
+		this.trigger( 'addVote', model, this );
 	}
 });
 
@@ -60,7 +81,16 @@ app.Collections.Competitions = Backbone.Collection.extend({
 });
 
 app.Collections.Competitors = Backbone.Collection.extend({
-	model: app.Models.Competitor
+	model: app.Models.Competitor,
+
+	initialize: function() {
+		this.listenTo( this, 'addVote', this.makeVoteUnique );
+	},
+
+	makeVoteUnique: function( vote, competitor ) {
+		var others = _.reject( this.models, function(m){ return m === competitor; } );
+		_.each( others, function(c){ c.votes.remove( vote ); } );
+	}
 });
 
 app.Collections.Votes = Backbone.Collection.extend({
@@ -119,9 +149,15 @@ app.Views.Competitor = app.View.extend({
 	},
 
 	vote: function() {
-		this.model.votes.add({
-			name: 'Mark',
-		});
+		if ( app.user.loggedIn ) {
+			this.model.votes.add({
+				name: app.user.name,
+				gravatar: app.user.gravatar,
+				id: app.user.id,
+			});
+		} else {
+			alert( 'Please log in to vote' );
+		}
 	},
 
 	addVoteView: function( vote, options ) {
@@ -133,6 +169,10 @@ app.Views.Competitor = app.View.extend({
 app.Views.Vote = app.View.extend({
 	tagName: "li",
 	template: wp.template( "vote" ),
+
+	initialize: function() {
+		this.listenTo( this.model, 'remove', this.remove );
+	}
 });
 
 })(jQuery);

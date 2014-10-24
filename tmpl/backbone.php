@@ -15,4 +15,4 @@ defined( 'WPINC' ) or die;
 <ul class="votes"></ul>
 </script>
 
-<script id="tmpl-vote" type="text/html">{{data.name}}</script>
+<script id="tmpl-vote" type="text/html">{{{data.gravatar}}}</script>
