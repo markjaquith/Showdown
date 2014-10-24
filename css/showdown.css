@@ -25,14 +25,15 @@
 	padding: 0 10px;
 }
 
-.showdown-plugin .competitor:first-of-type {
-	padding-left: 0;
-}
-
-.showdown-plugin .competitor:last-of-type {
-	padding-right: 0;
-}
-
 .showdown-plugin .competitor img {
 	cursor: pointer;
+}
+
+.showdown-plugin .votes {
+	list-style: none;
+	margin: 0;
+}
+
+.showdown-plugin .votes > li {
+	margin: 0;
 }
