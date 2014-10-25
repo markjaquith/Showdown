@@ -6,7 +6,7 @@ Author: Mark Jaquith
 
 class WCSF_2014_Showdown_Plugin {
 	static protected $instance;
-	const JS_CSS_VERSION = '1.0a';
+	const JS_CSS_VERSION = '1.0b';
 
 	protected function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );

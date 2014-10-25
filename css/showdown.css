@@ -32,12 +32,13 @@
 .showdown-plugin .votes {
 	list-style: none;
 	margin: 0;
+	line-height: 0;
 }
 
 .showdown-plugin .votes > li {
 	margin: 0;
 	float: left;
-	width: 20%;
+	width: 12.5%;
 }
 
 .showdown-plugin .votes > li img {
