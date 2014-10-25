@@ -111,8 +111,8 @@ app.Views.Competitions = app.View.extend({
 		_.each( this.collection.models, this.addCompetitionView, this );
 	},
 
-	addCompetitionView: function( competition, options ) {
-		this.views.add( new app.Views.Competition({ model: competition }), options || {} );
+	addCompetitionView: function( competition ) {
+		this.views.add( new app.Views.Competition({ model: competition }) );
 	}
 });
 
@@ -125,8 +125,8 @@ app.Views.Competition = app.View.extend({
 		_.each( this.model.competitors.models, this.addCompetitorView, this );
 	},
 
-	addCompetitorView: function( competitor, options ) {
-		this.views.add( '.competitors', new app.Views.Competitor({ model: competitor }), options || {} );
+	addCompetitorView: function( competitor ) {
+		this.views.add( '.competitors', new app.Views.Competitor({ model: competitor }) );
 	}
 });
 
@@ -151,8 +151,8 @@ app.Views.Competitor = app.View.extend({
 		}
 	},
 
-	addVoteView: function( vote, options ) {
-		this.views.add( '.votes', new app.Views.Vote({ model: vote }), options || {} );
+	addVoteView: function( vote ) {
+		this.views.add( '.votes', new app.Views.Vote({ model: vote }) );
 	}
 });
 
