@@ -29,7 +29,7 @@ class WCSF_2014_Showdown_Plugin {
 
 	public function the_posts( $posts ) {
 		foreach ( $posts as $p ) {
-			if ( false !== strpos( $p->post_content, '[showdown]' ) ) {
+			if ( has_shortcode( $p->post_content, 'showdown' ) ) {
 				wp_enqueue_script( 'showdown', plugin_dir_url( __FILE__ ) . 'js/showdown.js', array( 'wp-backbone' ), self::JS_CSS_VERSION );
 				wp_enqueue_style( 'showdown', plugin_dir_url( __FILE__ ) . 'css/showdown.css', array(), self::JS_CSS_VERSION );
 				add_action( 'wp_head', array( $this, 'templates' ) );
